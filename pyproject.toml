@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "scout-apm-python-logging"
+version = "0.1.0"
+description = "Scout APM Python Logging Agent"
+authors = ["Quinn Milionis <quinn@scoutapm.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+opentelemetry-api = "^1.26.0"
+opentelemetry-sdk = "^1.26.0"
+opentelemetry-exporter-otlp = "^1.26.0"
+
+
+[tool.poetry.group.dev.dependencies]
+taskipy = "^1.13.0"
+pytest = "^8.3.2"
+coverage = "^7.6.1"
+black = "^24.8.0"
+pytest-cov = "^5.0.0"
+flake8 = "^7.1.1"
+flake8-black = "^0.3.6"
+mypy = "^1.11.1"
+
+[tool.taskipy.tasks]
+test = "pytest . --cov-report=term-missing --cov=."
+lint = "task flake8 && task mypy"
+flake8 = "flake8 ."
+black = "black ."
+mypy = "poetry run mypy . --install-types --non-interactive --ignore-missing-imports"
+format = "task black"
+check = "task format && task lint && task test"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
