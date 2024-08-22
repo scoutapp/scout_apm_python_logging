@@ -8,7 +8,7 @@ from opentelemetry.sdk.resources import Resource
 
 
 class OTELLoggingManager:
-    def __init__(self, service_name, collector_endpoint_host="localhost"):
+    def __init__(self, service_name):
         self.service_name = service_name
         self.logger_provider = None
         self.logs_reporting_endpoint = "https://otlp.scoutotel.com:4317"
