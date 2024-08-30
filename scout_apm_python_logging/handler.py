@@ -5,6 +5,7 @@ from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
 from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
 from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
 from opentelemetry.sdk.resources import Resource
+from scout_apm.core.tracked_request import TrackedRequest
 
 
 class OtelScoutHandler(logging.Handler):
@@ -41,6 +42,26 @@ class OtelScoutHandler(logging.Handler):
 
     def emit(self, record):
         print("Emitting log")
+        scout_request = TrackedRequest.instance()
+        if scout_request: 
+            # Add Scout-specific attributes to the log record
+            record.scout_request_id = scout_request.request_id
+            record.scout_start_time = scout_request.start_time.isoformat()
+            record.scout_end_time = scout_request.end_time.isoformat() if scout_request.end_time else None
+            
+            # Add duration if the request is completed
+            if scout_request.end_time:
+                record.scout_duration = (scout_request.end_time - scout_request.start_time).total_seconds()
+            
+            # Add tags
+            for key, value in scout_request.tags.items():
+                setattr(record, f'scout_tag_{key}', value)
+                
+            # Add the current span's operation if available
+            current_span = scout_request.current_span()
+            if current_span:
+                record.scout_current_operation = current_span.operation
+
         self.otel_handler.emit(record)
 
     def close(self):
