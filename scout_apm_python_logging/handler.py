@@ -48,7 +48,7 @@ class OtelScoutHandler(logging.Handler):
         if self.should_ignore_log(record):
             return
 
-        if getattr(self._handling_log, 'value', False):
+        if getattr(self._handling_log, "value", False):
             # We're already handling a log message, so don't try to get the TrackedRequest
             return self.otel_handler.emit(record)
 
@@ -66,11 +66,12 @@ class OtelScoutHandler(logging.Handler):
                 # Add duration if the request is completed
                 if scout_request.end_time:
                     record.scout_duration = (
-                        scout_request.end_time - scout_request.start_time).total_seconds()
+                        scout_request.end_time - scout_request.start_time
+                    ).total_seconds()
 
                 # Add tags
                 for key, value in scout_request.tags.items():
-                    setattr(record, f'scout_tag_{key}', value)
+                    setattr(record, f"scout_tag_{key}", value)
 
                 # Add the current span's operation if available
                 current_span = scout_request.current_span()
@@ -103,10 +104,11 @@ class OtelScoutHandler(logging.Handler):
 
     def should_ignore_log(self, record):
         # Ignore logs from the OpenTelemetry exporter
-        if record.name.startswith('opentelemetry.exporter.otlp'):
+        if record.name.startswith("opentelemetry.exporter.otlp"):
             return True
-        
+
         return False
+
     def close(self):
         if self.logger_provider:
             self.logger_provider.shutdown()
@@ -117,19 +119,18 @@ class OtelScoutHandler(logging.Handler):
             return provided_name
 
         # Try to get the name from Scout APM config
-        scout_name = scout_config.value('name')
+        scout_name = scout_config.value("name")
         if scout_name:
             return scout_name
 
         # Fallback to a default name if neither is available
         return "unnamed-service"
+
     # These getters will be replaced by a config module to read these values
     # from a config file or environment variables as the Scout APM agent does.
 
     def _get_endpoint(self):
-        return os.getenv(
-            "SCOUT_LOGS_REPORTING_ENDPOINT", "otlp.scoutotel.com:4317"
-        )
+        return os.getenv("SCOUT_LOGS_REPORTING_ENDPOINT", "otlp.scoutotel.com:4317")
 
     def _get_ingest_key(self):
         ingest_key = os.getenv("SCOUT_LOGS_INGEST_KEY")

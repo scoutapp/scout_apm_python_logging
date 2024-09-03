@@ -43,7 +43,9 @@ app = Flask(__name__)
 
 # Scout APM configuration
 app.config["SCOUT_NAME"] = "Example Python App"
-app.config["SCOUT_KEY"] = os.environ.get("SCOUT_KEY")  # Make sure to set this environment variable
+app.config["SCOUT_KEY"] = os.environ.get(
+    "SCOUT_KEY"
+)  # Make sure to set this environment variable
 
 # Initialize Scout APM
 ScoutApm(app)
@@ -51,21 +53,25 @@ ScoutApm(app)
 # Get a logger
 logger = logging.getLogger(__name__)
 
-@app.route('/')
+
+@app.route("/")
 def hello():
     logger.info("Received request for hello endpoint")
     return "Hello, World!"
 
-@app.route('/error')
+
+@app.route("/error")
 def error():
     logger.error("This is a test error")
     return "Error logged", 500
 
-@app.route('/debug')
+
+@app.route("/debug")
 def debug():
     logger.debug("This is a debug message")
     return "Debug message logged", 200
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     logger.info("Starting Flask application")
     app.run(debug=True)
