@@ -1,0 +1,1 @@
+from scout_apm_python_logging.handler import OtelScoutHandler
