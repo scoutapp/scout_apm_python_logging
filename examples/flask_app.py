@@ -1,9 +1,8 @@
 import os
-from flask import Flask, request
+from flask import Flask
 import logging
 from logging.config import dictConfig
 from scout_apm.flask import ScoutApm
-from scout_apm_python_logging import OtelScoutHandler
 
 # Logging configuration
 LOGGING_CONFIG = {

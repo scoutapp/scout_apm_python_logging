@@ -1,5 +1,6 @@
 # Python
 __pycache__/
+.DS_Store
 
 # generated log files
 *.log
@@ -43,3 +44,8 @@ cover/
 # mypy
 .mypy_cache/
 
+# vscode
+settings.json
+
+# env
+.env*

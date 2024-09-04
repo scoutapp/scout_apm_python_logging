@@ -1,7 +1,6 @@
 import logging
 import os
 import threading
-import enum
 from opentelemetry import _logs
 from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
 from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
@@ -45,9 +44,6 @@ class OtelScoutHandler(logging.Handler):
         )
 
     def emit(self, record):
-        if self.should_ignore_log(record):
-            return
-
         if getattr(self._handling_log, "value", False):
             # We're already handling a log message, so don't try to get the TrackedRequest
             return self.otel_handler.emit(record)
@@ -78,36 +74,11 @@ class OtelScoutHandler(logging.Handler):
                 if current_span:
                     record.scout_current_operation = current_span.operation
 
-            # Handle Enum values in the log record
-            self.handle_enums(record)
-
             self.otel_handler.emit(record)
         except Exception as e:
             print(f"Error in OtelScoutHandler.emit: {e}")
         finally:
             self._handling_log.value = False
-
-    def handle_enums(self, record):
-        if isinstance(record.msg, enum.EnumMeta):
-            print("found an enum class")
-            for attr, value in record.__dict__.items():
-                print(f"attr: {attr}, value: {value} type {type(value)}")
-            record.msg = f"Enum class: {record.msg.__name__}"
-        elif isinstance(record.msg, enum.Enum):
-            record.msg = f"{record.msg.__class__.__name__}.{record.msg.name}"
-
-        for attr, value in record.__dict__.items():
-            if isinstance(value, enum.EnumMeta):
-                setattr(record, attr, f"Enum class: {value.__name__}")
-            elif isinstance(value, enum.Enum):
-                setattr(record, attr, f"{value.__class__.__name__}.{value.name}")
-
-    def should_ignore_log(self, record):
-        # Ignore logs from the OpenTelemetry exporter
-        if record.name.startswith("opentelemetry.exporter.otlp"):
-            return True
-
-        return False
 
     def close(self):
         if self.logger_provider:
@@ -128,12 +99,14 @@ class OtelScoutHandler(logging.Handler):
 
     # These getters will be replaced by a config module to read these values
     # from a config file or environment variables as the Scout APM agent does.
-
     def _get_endpoint(self):
-        return os.getenv("SCOUT_LOGS_REPORTING_ENDPOINT", "otlp.scoutotel.com:4317")
+        return (
+            scout_config.value("SCOUT_LOGS_REPORTING_ENDPOINT")
+            or "otlp.scoutotel.com:4317"
+        )
 
     def _get_ingest_key(self):
-        ingest_key = os.getenv("SCOUT_LOGS_INGEST_KEY")
+        ingest_key = scout_config.value("SCOUT_LOGS_INGEST_KEY")
         if not ingest_key:
             raise ValueError("SCOUT_LOGS_INGEST_KEY is not set")
         return ingest_key
