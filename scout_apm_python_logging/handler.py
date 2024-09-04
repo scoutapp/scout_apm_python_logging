@@ -13,8 +13,8 @@ from scout_apm.core import scout_config
 class OtelScoutHandler(logging.Handler):
     def __init__(self, service_name):
         super().__init__()
-        self.service_name = service_name
         self.logger_provider = None
+        self.service_name = self._get_service_name(service_name)
         self.ingest_key = self._get_ingest_key()
         self.endpoint = self._get_endpoint()
         self.setup_logging()
@@ -85,6 +85,9 @@ class OtelScoutHandler(logging.Handler):
             self.logger_provider.shutdown()
         super().close()
 
+    # These getters will be replaced by a config module to read these values
+    # from a config file or environment variables as the Scout APM agent does.
+
     def _get_service_name(self, provided_name):
         if provided_name:
             return provided_name
@@ -94,11 +97,8 @@ class OtelScoutHandler(logging.Handler):
         if scout_name:
             return scout_name
 
-        # Fallback to a default name if neither is available
         return "unnamed-service"
 
-    # These getters will be replaced by a config module to read these values
-    # from a config file or environment variables as the Scout APM agent does.
     def _get_endpoint(self):
         return (
             scout_config.value("SCOUT_LOGS_REPORTING_ENDPOINT")
