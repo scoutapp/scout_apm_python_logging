@@ -45,7 +45,7 @@ class OtelScoutHandler(logging.Handler):
 
     def emit(self, record):
         if getattr(self._handling_log, "value", False):
-            # We're already handling a log message, so don't try to get the TrackedRequest
+            # We're already handling a log message, don't try to get the TrackedRequest
             return self.otel_handler.emit(record)
 
         try:
@@ -64,6 +64,8 @@ class OtelScoutHandler(logging.Handler):
                     record.scout_duration = (
                         scout_request.end_time - scout_request.start_time
                     ).total_seconds()
+
+                record.service_name = self.service_name
 
                 # Add tags
                 for key, value in scout_request.tags.items():
@@ -101,12 +103,11 @@ class OtelScoutHandler(logging.Handler):
 
     def _get_endpoint(self):
         return (
-            scout_config.value("SCOUT_LOGS_REPORTING_ENDPOINT")
-            or "otlp.scoutotel.com:4317"
+            scout_config.value("logs_reporting_endpoint") or "otlp.scoutotel.com:4317"
         )
 
     def _get_ingest_key(self):
-        ingest_key = scout_config.value("SCOUT_LOGS_INGEST_KEY")
+        ingest_key = scout_config.value("logs_ingest_key")
         if not ingest_key:
             raise ValueError("SCOUT_LOGS_INGEST_KEY is not set")
         return ingest_key
