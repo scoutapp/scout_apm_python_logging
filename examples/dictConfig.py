@@ -1,5 +1,5 @@
-# An example of how to use the scout handler with dictConfig, 
-# useful for early testing 
+# An example of how to use the scout handler with dictConfig,
+# useful for early testing
 
 import logging
 import logging.config
@@ -10,7 +10,7 @@ LOGGING_CONFIG = {
     "disable_existing_loggers": False,
     "formatters": {
         "verbose": {
-            "format": "%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s"
+            "format": "%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s"  # noqa E501
         },
         "simple": {"format": "%(levelname)s %(message)s"},
     },
