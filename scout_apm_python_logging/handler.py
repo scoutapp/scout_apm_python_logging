@@ -109,5 +109,17 @@ class OtelScoutHandler(logging.Handler):
     def _get_ingest_key(self):
         ingest_key = scout_config.value("logs_ingest_key")
         if not ingest_key:
-            raise ValueError("SCOUT_LOGS_INGEST_KEY is not set")
+            try:
+                from django.conf import settings
+
+                ingest_key = getattr(settings, "SCOUT_LOGS_INGEST_KEY", None)
+            except ImportError:
+                pass
+
+        if not ingest_key:
+            raise ValueError(
+                "SCOUT_LOGS_INGEST_KEY is not set, please do so in \
+                             your environment or django config file"
+            )
+
         return ingest_key
