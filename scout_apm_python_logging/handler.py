@@ -53,6 +53,8 @@ class OtelScoutHandler(logging.Handler):
             scout_request = TrackedRequest.instance()
 
             if scout_request:
+                self._get_operation_name(scout_request)
+
                 # Add Scout-specific attributes to the log record
                 record.scout_request_id = scout_request.request_id
                 record.scout_start_time = scout_request.start_time.isoformat()
@@ -105,6 +107,13 @@ class OtelScoutHandler(logging.Handler):
         return (
             scout_config.value("logs_reporting_endpoint") or "otlp.scoutotel.com:4317"
         )
+
+    def _get_operation_name(self, record: TrackedRequest):
+        # Iterate backwards since with the controller name 
+        # will be near the end of the list
+        for span in record.complete_spans[::-1]:
+            if span.operation.startswith("Controller/"):
+                return span.operation
 
     def _get_ingest_key(self):
         ingest_key = scout_config.value("logs_ingest_key")
