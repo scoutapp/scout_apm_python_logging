@@ -3,6 +3,7 @@ import logging
 import io
 from unittest.mock import patch, MagicMock
 from scout_apm_python_logging.handler import OtelScoutHandler
+from scout_apm.core.tracked_request import Span
 
 
 @pytest.fixture
@@ -29,6 +30,10 @@ def test_emit_with_scout_request(mock_tracked_request, otel_scout_handler):
     mock_request.start_time.isoformat.return_value = "2024-03-06T12:00:00"
     mock_request.end_time.isoformat.return_value = "2024-03-06T12:00:01"
     mock_request.tags = {"key": "value"}
+    mock_request.complete_spans = [
+        Span(mock_request.id, "Middleware"),
+        Span(mock_request.id, "Controller/foobar"),
+    ]
     mock_tracked_request.instance.return_value = mock_request
 
     with patch.object(otel_scout_handler, "otel_handler") as mock_otel_handler:
@@ -48,6 +53,7 @@ def test_emit_with_scout_request(mock_tracked_request, otel_scout_handler):
         assert record.scout_start_time == "2024-03-06T12:00:00"
         assert record.scout_end_time == "2024-03-06T12:00:01"
         assert record.scout_tag_key == "value"
+        assert record.operation == "Controller/foobar"
 
 
 @patch("scout_apm_python_logging.handler.TrackedRequest")

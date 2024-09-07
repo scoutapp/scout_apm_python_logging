@@ -53,7 +53,7 @@ class OtelScoutHandler(logging.Handler):
             scout_request = TrackedRequest.instance()
 
             if scout_request:
-                self._get_operation_name(scout_request)
+                record.operation = self._get_operation_name(scout_request)
 
                 # Add Scout-specific attributes to the log record
                 record.scout_request_id = scout_request.request_id
@@ -109,7 +109,7 @@ class OtelScoutHandler(logging.Handler):
         )
 
     def _get_operation_name(self, record: TrackedRequest):
-        # Iterate backwards since with the controller name 
+        # Iterate backwards since with the controller name
         # will be near the end of the list
         for span in record.complete_spans[::-1]:
             if span.operation.startswith("Controller/"):
