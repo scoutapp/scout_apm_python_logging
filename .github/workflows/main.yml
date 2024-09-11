@@ -9,7 +9,8 @@ jobs:
     strategy: 
       matrix: 
         python-version: ["3.9", "3.10", "3.11", "3.12"]
-
+    env:
+      SCOUT_LOGS_INGEST_KEY: test-ingest-key
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
