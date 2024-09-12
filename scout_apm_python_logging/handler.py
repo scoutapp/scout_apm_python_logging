@@ -117,14 +117,15 @@ class OtelScoutHandler(logging.Handler):
                     return span.operation
 
         try:
-            # TrackedRequest.operation will only exist on scout_apm > 3.2.0
             return (
                 record.operation
+                # Check for type to support test mocks
                 if type(record.operation) is str
                 else from_spans(record)
             )
         except AttributeError:
-            pass
+            # TrackedRequest.operation will only exist on scout_apm > 3.2.0
+            return from_spans(record)
 
     def _get_ingest_key(self):
         ingest_key = scout_config.value("logs_ingest_key")
