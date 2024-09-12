@@ -109,11 +109,22 @@ class OtelScoutHandler(logging.Handler):
         )
 
     def _get_operation_name(self, record: TrackedRequest):
-        # Iterate backwards since with the controller name
-        # will be near the end of the list
-        for span in record.complete_spans[::-1]:
-            if span.operation.startswith("Controller/"):
-                return span.operation
+        def from_spans(record):
+            # Iterate backwards since with the controller name
+            # will be near the end of the list
+            for span in record.complete_spans[::-1]:
+                if span.operation.startswith("Controller/"):
+                    return span.operation
+
+        try:
+            # TrackedRequest.operation will only exist on scout_apm > 3.2.0
+            return (
+                record.operation
+                if type(record.operation) is str
+                else from_spans(record)
+            )
+        except AttributeError:
+            pass
 
     def _get_ingest_key(self):
         ingest_key = scout_config.value("logs_ingest_key")
