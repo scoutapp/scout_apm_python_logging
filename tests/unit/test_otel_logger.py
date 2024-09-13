@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from scout_apm_python_logging.otel_logger import (
+from scout_apm_logging.otel_logger import (
     OTELLoggingManager,
     initialize_otel_logging,
 )
@@ -8,11 +8,11 @@ from scout_apm_python_logging.otel_logger import (
 
 class TestOTELLoggingManager(unittest.TestCase):
 
-    @patch("scout_apm_python_logging.otel_logger.LoggerProvider")
-    @patch("scout_apm_python_logging.otel_logger.OTLPLogExporter")
-    @patch("scout_apm_python_logging.otel_logger.BatchLogRecordProcessor")
-    @patch("scout_apm_python_logging.otel_logger.LoggingHandler")
-    @patch("scout_apm_python_logging.otel_logger.set_logger_provider")
+    @patch("scout_apm_logging.otel_logger.LoggerProvider")
+    @patch("scout_apm_logging.otel_logger.OTLPLogExporter")
+    @patch("scout_apm_logging.otel_logger.BatchLogRecordProcessor")
+    @patch("scout_apm_logging.otel_logger.LoggingHandler")
+    @patch("scout_apm_logging.otel_logger.set_logger_provider")
     def test_setup_logging(
         self,
         mock_set_logger_provider,
@@ -36,7 +36,7 @@ class TestOTELLoggingManager(unittest.TestCase):
         mock_batch_processor.assert_called_once()
         mock_logging_handler.assert_called_once()
 
-    @patch("scout_apm_python_logging.otel_logger.OTELLoggingManager")
+    @patch("scout_apm_logging.otel_logger.OTELLoggingManager")
     def test_initialize_otel_logging(self, mock_otel_manager):
         service_name = "test-service"
         mock_manager_instance = MagicMock()
