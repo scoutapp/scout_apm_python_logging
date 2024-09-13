@@ -17,7 +17,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-versions: "3.x"
+          python-version: "3.x"
       - name: Install pypa/build
         run: >-
           python3 -m
@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: testpypi
-      url: https://test.pypi.org/p/scout-apm-logs
+      url: https://test.pypi.org/p/scout-apm-logging
 
     permissions:
       id-token: write
@@ -63,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/scout-apm-logs
+      url: https://pypi.org/p/scout-apm-logging
 
     permissions:
       id-token: write
