@@ -53,7 +53,11 @@ class OtelScoutHandler(logging.Handler):
             scout_request = TrackedRequest.instance()
 
             if scout_request:
-                record.operation = self._get_operation_name(scout_request)
+                operation = self._get_operation_name(scout_request)
+                # TODO this is searched via "controller_entrypoint" in Scout
+                # we might need to determine if this is a "controller" or background task
+                if operation: 
+                    record.controller_entrypoint = operation
 
                 # Add Scout-specific attributes to the log record
                 record.scout_request_id = scout_request.request_id
@@ -114,10 +118,10 @@ class OtelScoutHandler(logging.Handler):
             # will be near the end of the list
             for span in record.complete_spans[::-1]:
                 if span.operation.startswith("Controller/"):
-                    return span.operation
+                    return span.operation[len("Controller/"):]
 
         operation = getattr(record, "operation", None)
-        return operation if operation else from_spans(record)
+        return operation[len("Controller/"):] if operation else from_spans(record)
 
     def _get_ingest_key(self):
         ingest_key = scout_config.value("logs_ingest_key")
