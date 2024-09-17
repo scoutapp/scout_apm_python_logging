@@ -8,6 +8,7 @@ from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
 from opentelemetry.sdk.resources import Resource
 from scout_apm.core.tracked_request import TrackedRequest
 from scout_apm.core import scout_config
+from scout_apm_python_logging.utils.operation_utils import get_operation_detail
 
 
 class OtelScoutHandler(logging.Handler):
@@ -53,11 +54,13 @@ class OtelScoutHandler(logging.Handler):
             scout_request = TrackedRequest.instance()
 
             if scout_request:
-                operation = self._get_operation_name(scout_request)
-                # TODO this is searched via "controller_entrypoint" in Scout
-                # we may need to determine if this is a "controller" or background task
-                if operation:
-                    record.controller_entrypoint = operation
+                operation_detail = get_operation_detail(scout_request)
+                if operation_detail:
+                    setattr(
+                        record,
+                        operation_detail.entrypoint_attribute,
+                        operation_detail.name,
+                    )
 
                 # Add Scout-specific attributes to the log record
                 record.scout_request_id = scout_request.request_id
@@ -111,17 +114,6 @@ class OtelScoutHandler(logging.Handler):
         return (
             scout_config.value("logs_reporting_endpoint") or "otlp.scoutotel.com:4317"
         )
-
-    def _get_operation_name(self, record: TrackedRequest):
-        def from_spans(record):
-            # Iterate backwards since with the controller name
-            # will be near the end of the list
-            for span in record.complete_spans[::-1]:
-                if span.operation.startswith("Controller/"):
-                    return span.operation[len("Controller/") :]
-
-        operation = getattr(record, "operation", None)
-        return operation[len("Controller/") :] if operation else from_spans(record)
 
     def _get_ingest_key(self):
         ingest_key = scout_config.value("logs_ingest_key")
