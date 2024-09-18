@@ -1,6 +1,6 @@
 from typing import List, Optional
 from dataclasses import dataclass
-from scout_apm_python_logging.utils.operation_utils import (
+from scout_apm_logging.utils.operation_utils import (
     OperationDetail,
     OperationType,
     get_operation_detail,

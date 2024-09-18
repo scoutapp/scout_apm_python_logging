@@ -8,7 +8,7 @@ from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
 from opentelemetry.sdk.resources import Resource
 from scout_apm.core.tracked_request import TrackedRequest
 from scout_apm.core import scout_config
-from scout_apm_python_logging.utils.operation_utils import get_operation_detail
+from scout_apm_logging.utils.operation_utils import get_operation_detail
 
 
 class OtelScoutHandler(logging.Handler):
