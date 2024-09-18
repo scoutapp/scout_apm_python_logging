@@ -33,20 +33,16 @@ def get_operation_detail(record: TrackedRequest) -> Optional[OperationDetail]:
                 return OperationDetail(name=operation[len(prefix) :], type=op_type)
         return None
 
-    # Check the current span first
-    current_span = record.current_span()
-    if current_span:
-        return extract_operation(current_span.operation)
-
-    # If no current span, check the last completed span
-    if record.complete_spans:
-        last_span = record.complete_spans[-1]
-        return extract_operation(last_span.operation)
-
-    # If no spans at all, fall back to the record's operation attribute
-    # TODO this may never happen and could possibly be removed
+    # Check the operation attribute first
     operation = getattr(record, "operation", None)
     if operation:
         return extract_operation(operation)
+
+    # Fall back to checking spans
+    spans = getattr(record, "complete_spans", None) or []
+    for span in reversed(spans):
+        result = extract_operation(span.operation)
+        if result:
+            return result
 
     return None
