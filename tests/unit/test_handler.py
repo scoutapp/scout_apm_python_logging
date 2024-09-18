@@ -2,16 +2,16 @@ import pytest
 import logging
 import io
 from unittest.mock import patch, MagicMock
-from scout_apm_python_logging.handler import OtelScoutHandler
+from scout_apm_logging.handler import OtelScoutHandler
 from scout_apm.core.tracked_request import Span
 
 
 @pytest.fixture
 def otel_scout_handler():
-    with patch("scout_apm_python_logging.handler.OTLPLogExporter"), patch(
-        "scout_apm_python_logging.handler.LoggerProvider"
-    ), patch("scout_apm_python_logging.handler.BatchLogRecordProcessor"), patch(
-        "scout_apm_python_logging.handler.Resource"
+    with patch("scout_apm_logging.handler.OTLPLogExporter"), patch(
+        "scout_apm_logging.handler.LoggerProvider"
+    ), patch("scout_apm_logging.handler.BatchLogRecordProcessor"), patch(
+        "scout_apm_logging.handler.Resource"
     ):
         handler = OtelScoutHandler(service_name="test-service")
         yield handler
@@ -23,7 +23,7 @@ def test_init(otel_scout_handler):
     assert otel_scout_handler.endpoint is not None
 
 
-@patch("scout_apm_python_logging.handler.TrackedRequest")
+@patch("scout_apm_logging.handler.TrackedRequest")
 def test_emit_with_scout_request(mock_tracked_request, otel_scout_handler):
     mock_request = MagicMock()
     mock_request.request_id = "test-id"
@@ -57,7 +57,7 @@ def test_emit_with_scout_request(mock_tracked_request, otel_scout_handler):
         assert record.operation == "Controller/foobar"
 
 
-@patch("scout_apm_python_logging.handler.TrackedRequest")
+@patch("scout_apm_logging.handler.TrackedRequest")
 def test_emit_when_scout_request_contains_operation(
     mock_tracked_request, otel_scout_handler
 ):
@@ -92,7 +92,7 @@ def test_emit_when_scout_request_contains_operation(
         assert record.operation == "Controller/foobar"
 
 
-@patch("scout_apm_python_logging.handler.TrackedRequest")
+@patch("scout_apm_logging.handler.TrackedRequest")
 def test_emit_without_scout_request(mock_tracked_request, otel_scout_handler):
     mock_tracked_request.instance.return_value = None
     with patch.object(otel_scout_handler, "otel_handler") as mock_otel_handler:
@@ -134,7 +134,7 @@ def test_emit_already_handling_log(otel_scout_handler):
 
 def test_emit_exception_handling(otel_scout_handler):
     with patch(
-        "scout_apm_python_logging.handler.TrackedRequest"
+        "scout_apm_logging.handler.TrackedRequest"
     ) as mock_tracked_request, patch(
         "sys.stdout", new_callable=io.StringIO
     ) as mock_stdout:
@@ -167,7 +167,7 @@ def test_close(otel_scout_handler):
         mock_shutdown.assert_called_once()
 
 
-@patch("scout_apm_python_logging.handler.scout_config")
+@patch("scout_apm_logging.handler.scout_config")
 def test_get_service_name(mock_scout_config, otel_scout_handler):
     mock_scout_config.value.return_value = "scout-service"
     assert otel_scout_handler._get_service_name(None) == "scout-service"
@@ -178,19 +178,19 @@ def test_get_service_name(mock_scout_config, otel_scout_handler):
     assert otel_scout_handler._get_service_name(None) == "unnamed-service"
 
 
-@patch("scout_apm_python_logging.handler.scout_config")
+@patch("scout_apm_logging.handler.scout_config")
 def test_get_endpoint(mock_scout_config, otel_scout_handler):
     mock_scout_config.value.return_value = "custom.endpoint:1234"
     assert otel_scout_handler._get_endpoint() == "custom.endpoint:1234"
 
 
-@patch("scout_apm_python_logging.handler.scout_config")
+@patch("scout_apm_logging.handler.scout_config")
 def test_get_ingest_key(mock_scout_config, otel_scout_handler):
     mock_scout_config.value.return_value = "test-ingest-key"
     assert otel_scout_handler._get_ingest_key() == "test-ingest-key"
 
 
-@patch("scout_apm_python_logging.handler.scout_config")
+@patch("scout_apm_logging.handler.scout_config")
 def test_get_ingest_key_not_set(mock_scout_config, otel_scout_handler):
     mock_scout_config.value.return_value = None
     with pytest.raises(ValueError, match="SCOUT_LOGS_INGEST_KEY is not set"):
