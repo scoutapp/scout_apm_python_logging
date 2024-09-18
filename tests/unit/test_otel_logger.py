@@ -47,7 +47,3 @@ class TestOTELLoggingManager(unittest.TestCase):
         mock_otel_manager.assert_called_once_with(service_name)
         mock_manager_instance.setup_logging.assert_called_once()
         self.assertEqual(result, mock_manager_instance)
-
-
-if __name__ == "__main__":
-    unittest.main()
