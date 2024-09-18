@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "scout-apm-logging"
-version = "0.1.1"
+version = "0.1.2"
 description = "Scout APM Python Logging Agent"
 authors = ["Quinn Milionis <quinn@scoutapm.com>"]
 readme = "README.md"
