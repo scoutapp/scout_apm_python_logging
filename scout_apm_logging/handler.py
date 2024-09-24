@@ -74,7 +74,7 @@ class OtelScoutHandler(logging.Handler):
                         scout_request.end_time - scout_request.start_time
                     ).total_seconds()
 
-                record.service_name = self.service_name
+                setattr(record, "service.name", self.service_name)
 
                 # Add tags
                 for key, value in scout_request.tags.items():
