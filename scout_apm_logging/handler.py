@@ -33,7 +33,7 @@ class ScoutOtelHandler(logging.Handler):
         _logs.set_logger_provider(self.logger_provider)
 
         otlp_exporter = OTLPLogExporter(
-            headers={"x-telemetryhub-key": self.ingest_key},
+            headers={"x-scout-key": self.ingest_key},
             endpoint=self.endpoint,
         )
         self.logger_provider.add_log_record_processor(
