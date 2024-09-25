@@ -22,12 +22,12 @@ pip install scout-apm-python-logging
 
 ### Using dictConfig
 
-We recommend setting up the `OtelScoutHandler` using Python's [`dictConfig`](https://docs.python.org/3/library/logging.config.html#logging.config.dictConfig). Here's an example configuration:
+We recommend setting up the `ScoutOtelHandler` using Python's [`dictConfig`](https://docs.python.org/3/library/logging.config.html#logging.config.dictConfig). Here's an example configuration:
 
 ```python
 import logging
 from logging.config import dictConfig
-from scout_apm_python_logging import OtelScoutHandler
+from scout_apm_python_logging import ScoutOtelHandler
 
 LOGGING_CONFIG = {
     "version": 1,
@@ -40,7 +40,7 @@ LOGGING_CONFIG = {
     "handlers": {
         "otel": {
             "level": "DEBUG",
-            "class": "scout_apm_python_logging.OtelScoutHandler",
+            "class": "scout_apm_python_logging.ScoutOtelHandler",
             "service_name": "your-service-name",
         },
         "console": {
@@ -63,33 +63,35 @@ dictConfig(LOGGING_CONFIG)
 
 ### Adding to an Existing Logger
 
-You can also add the `OtelScoutHandler` to an existing logger:
+You can also add the `ScoutOtelHandler` to an existing logger:
 
 ```python
 import logging
-from scout_apm_python_logging import OtelScoutHandler
+from scout_apm_python_logging import ScoutOtelHandler
 
 # Get your logger
 logger = logging.getLogger(__name__)
 
-# Create and add the OtelScoutHandler
-handler = OtelScoutHandler(service_name="your-service-name")
+# Create and add the ScoutOtelHandler
+handler = ScoutOtelHandler(service_name="your-service-name")
 logger.addHandler(handler)
 ```
 
+> Alternative logging configurations are covered in our [documentation](/https://scoutapm.com/docs/features/log-management#common-configurations-python)
+
 ## Configuration
 
-The `OtelScoutHandler` only requires `service_name` to be supplied to the handler as an argument:
+The `ScoutOtelHandler` only requires `service_name` to be supplied to the handler as an argument:
 
 If the `scout-apm` is [configured](https://scoutapm.com/docs/python#some-configuration-required) (You've set your `SCOUT_KEY`, etc), you'll only need add your `SCOUT_LOGS_INGEST_KEY` to whichever configuration you are already using. This can also be set as an environment variable.
 
-Make sure to set the `SCOUT_LOGS_INGEST_KEY` variable before running your application.
+Make sure to set the `SCOUT_LOGS_INGEST_KEY` variable in the above configuration before running your application.
 
 ## OpenTelemetry
 
 The Scout APM Python Logging Agent leverages [OpenTelemetry Python](https://github.com/open-telemetry/opentelemetry-python) to provide powerful and standardized logging capabilities. OpenTelemetry is an observability framework for cloud-native software, offering a collection of tools, APIs, and SDKs for generating, collecting, and exporting telemetry data (metrics, logs, and traces).
 
-Our `OtelScoutHandler` utilizes the OpenTelemetry Python SDK to:
+Our `ScoutOtelHandler` utilizes the OpenTelemetry Python SDK to:
 
 1. Create a `LoggerProvider` with a custom resource that includes your service name and instance ID.
 2. Set up an OTLP (OpenTelemetry Protocol) exporter configured to send logs to Scout's ingestion endpoint.

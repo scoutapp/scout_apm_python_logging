@@ -17,7 +17,7 @@ LOGGING_CONFIG = {
     "handlers": {
         "otel": {
             "level": "DEBUG",
-            "class": "scout_apm_logging.OtelScoutHandler",
+            "class": "scout_apm_logging.ScoutOtelHandler",
             "service_name": "example-python-app",
         },
         "console": {

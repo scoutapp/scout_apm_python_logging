@@ -2,7 +2,7 @@ import pytest
 import logging
 import io
 from unittest.mock import patch, MagicMock
-from scout_apm_logging.handler import OtelScoutHandler
+from scout_apm_logging.handler import ScoutOtelHandler
 from scout_apm.core.tracked_request import Span
 
 
@@ -13,7 +13,7 @@ def otel_scout_handler():
     ), patch("scout_apm_logging.handler.BatchLogRecordProcessor"), patch(
         "scout_apm_logging.handler.Resource"
     ):
-        handler = OtelScoutHandler(service_name="test-service")
+        handler = ScoutOtelHandler(service_name="test-service")
         yield handler
 
 
@@ -155,7 +155,7 @@ def test_emit_exception_handling(otel_scout_handler):
 
         # Check that the exception was caught and the error message was printed
         assert (
-            "Error in OtelScoutHandler.emit: Test exception" in mock_stdout.getvalue()
+            "Error in ScoutOtelHandler.emit: Test exception" in mock_stdout.getvalue()
         )
 
     otel_scout_handler._handling_log.value = False
