@@ -11,7 +11,7 @@ from scout_apm.core import scout_config
 from scout_apm_logging.utils.operation_utils import get_operation_detail
 
 
-class OtelScoutHandler(logging.Handler):
+class ScoutOtelHandler(logging.Handler):
     def __init__(self, service_name):
         super().__init__()
         self.logger_provider = None
@@ -33,7 +33,7 @@ class OtelScoutHandler(logging.Handler):
         _logs.set_logger_provider(self.logger_provider)
 
         otlp_exporter = OTLPLogExporter(
-            headers={"x-telemetryhub-key": self.ingest_key},
+            headers={"x-scout-key": self.ingest_key},
             endpoint=self.endpoint,
         )
         self.logger_provider.add_log_record_processor(
@@ -87,7 +87,7 @@ class OtelScoutHandler(logging.Handler):
 
             self.otel_handler.emit(record)
         except Exception as e:
-            print(f"Error in OtelScoutHandler.emit: {e}")
+            print(f"Error in ScoutOtelHandler.emit: {e}")
         finally:
             self._handling_log.value = False
 
