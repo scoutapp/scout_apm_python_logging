@@ -1,10 +1,14 @@
 [tool.poetry]
 name = "scout-apm-logging"
 version = "1.0.0"
-description = "Scout APM Python Logging Agent"
+description = "Opentelemetry logging integration for Scout APM"
 authors = ["Quinn Milionis <quinn@scoutapm.com>"]
+maintainers = ["Scout <support@scoutapm.com>"]
 readme = "README.md"
-
+urls = {
+    "github": "https://github.com/scoutapp/scout_apm_python_logging"
+    "scout": "https://scoutapm.com"
+}
 [tool.poetry.dependencies]
 python = "^3.9"
 opentelemetry-api = "^1.26.0"
