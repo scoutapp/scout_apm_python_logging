@@ -61,7 +61,6 @@ class ScoutOtelHandler(logging.Handler):
 
     def emit(self, record):
         try:
-            self._handling_log.value = True
             # Initialize here to ensure that required configuration variables are loaded
             if not ScoutOtelHandler._class_initialized:
                 try:
@@ -76,6 +75,8 @@ class ScoutOtelHandler(logging.Handler):
             if getattr(self._handling_log, "value", False):
                 # We're already handling a log message, don't get the TrackedRequest
                 return self.otel_handler.emit(record)
+
+            self._handling_log.value = True
             scout_request = TrackedRequest.instance()
 
             if scout_request:

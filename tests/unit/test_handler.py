@@ -7,15 +7,22 @@ from scout_apm.core.tracked_request import Span
 
 
 @pytest.fixture
-@patch("scout_apm_logging.handler.scout_config")
-def otel_scout_handler(mock_scout_config):
-    mock_scout_config.value.return_value = "test-ingest-key"
-    with patch("scout_apm_logging.handler.OTLPLogExporter"), patch(
-        "scout_apm_logging.handler.LoggerProvider"
-    ), patch("scout_apm_logging.handler.BatchLogRecordProcessor"), patch(
+def otel_scout_handler():
+    # Reset class initialization state
+    ScoutOtelHandler._class_initialized = False
+
+    with patch("scout_apm_logging.handler.scout_config") as mock_scout_config, patch(
+        "scout_apm_logging.handler.OTLPLogExporter"
+    ), patch("scout_apm_logging.handler.LoggerProvider"), patch(
+        "scout_apm_logging.handler.BatchLogRecordProcessor"
+    ), patch(
         "scout_apm_logging.handler.Resource"
     ):
+
+        mock_scout_config.value.return_value = "test-ingest-key"
         handler = ScoutOtelHandler(service_name="test-service")
+        # Force initialization
+        handler._initialize()
         return handler
 
 
@@ -86,12 +93,12 @@ def test_emit_when_scout_request_contains_operation(
         )
         otel_scout_handler.emit(record)
 
-        mock_otel_handler.emit.assert_called_once()
-        assert record.scout_request_id == "test-id"
-        assert record.scout_start_time == "2024-03-06T12:00:00"
-        assert record.scout_end_time == "2024-03-06T12:00:01"
-        assert record.scout_tag_key == "value"
-        assert record.controller_entrypoint == "foobar"
+    mock_otel_handler.emit.assert_called_once()
+    assert record.scout_request_id == "test-id"
+    assert record.scout_start_time == "2024-03-06T12:00:00"
+    assert record.scout_end_time == "2024-03-06T12:00:01"
+    assert record.scout_tag_key == "value"
+    assert record.controller_entrypoint == "foobar"
 
 
 @patch("scout_apm_logging.handler.TrackedRequest")
