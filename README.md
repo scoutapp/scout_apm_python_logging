@@ -27,7 +27,7 @@ We recommend setting up the `ScoutOtelHandler` using Python's [`dictConfig`](htt
 ```python
 import logging
 from logging.config import dictConfig
-from scout_apm_python_logging import ScoutOtelHandler
+from scout_apm_logging import ScoutOtelHandler
 
 LOGGING_CONFIG = {
     "version": 1,
@@ -40,7 +40,7 @@ LOGGING_CONFIG = {
     "handlers": {
         "otel": {
             "level": "DEBUG",
-            "class": "scout_apm_python_logging.ScoutOtelHandler",
+            "class": "scout_apm_logging.ScoutOtelHandler",
             "service_name": "your-service-name",
         },
         "console": {
@@ -67,7 +67,7 @@ You can also add the `ScoutOtelHandler` to an existing logger:
 
 ```python
 import logging
-from scout_apm_python_logging import ScoutOtelHandler
+from scout_apm_logging import ScoutOtelHandler
 
 # Get your logger
 logger = logging.getLogger(__name__)
