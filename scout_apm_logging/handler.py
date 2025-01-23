@@ -69,9 +69,6 @@ class ScoutOtelHandler(logging.Handler):
                     print(f"Failed to initialize ScoutOtelHandler: {e}")
                     return
 
-            if not self.otel_handler:
-                return
-
             if getattr(self._handling_log, "value", False):
                 # We're already handling a log message, don't get the TrackedRequest
                 return self.otel_handler.emit(record)

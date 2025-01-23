@@ -204,3 +204,41 @@ def test_get_ingest_key_not_set(mock_scout_config, otel_scout_handler):
     mock_scout_config.value.return_value = None
     with pytest.raises(ValueError, match="SCOUT_LOGS_INGEST_KEY is not set"):
         otel_scout_handler._get_ingest_key()
+
+
+def test_initialize_only_once(otel_scout_handler):
+    # First initialization happens in fixture
+    initial_service_name = otel_scout_handler.service_name
+
+    # Try to initialize again
+    otel_scout_handler._initialize()
+
+    # Service name should not change since second initialization should return early
+    assert otel_scout_handler.service_name == initial_service_name
+
+
+def test_emit_handles_initialization_failure():
+    with patch("scout_apm_logging.handler.scout_config") as mock_scout_config:
+        mock_scout_config.value.return_value = (
+            None  # This will cause _get_ingest_key to fail
+        )
+        ScoutOtelHandler._class_initialized = False
+
+        handler = ScoutOtelHandler(service_name="test-service")
+
+        with patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
+            record = logging.LogRecord(
+                name="test",
+                level=logging.INFO,
+                pathname="",
+                lineno=0,
+                msg="Test message",
+                args=(),
+                exc_info=None,
+            )
+            handler.emit(record)
+
+            assert (
+                "Failed to initialize ScoutOtelHandler: "
+                "SCOUT_LOGS_INGEST_KEY is not set" in mock_stdout.getvalue()
+            )
