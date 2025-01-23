@@ -12,14 +12,29 @@ from scout_apm_logging.utils.operation_utils import get_operation_detail
 
 
 class ScoutOtelHandler(logging.Handler):
+    # Flag to prevent multiple initializations
+    _class_initialized = False
+    _initialization_lock = threading.Lock()
+
     def __init__(self, service_name):
         super().__init__()
         self.logger_provider = None
-        self.service_name = self._get_service_name(service_name)
-        self.ingest_key = self._get_ingest_key()
-        self.endpoint = self._get_endpoint()
-        self.setup_logging()
+        self.otel_handler = None
+        self.service_name = service_name
         self._handling_log = threading.local()
+        self._initialized = False
+        self._initializing = False
+
+    def _initialize(self):
+        with self._initialization_lock:
+            if ScoutOtelHandler._class_initialized:
+                return
+
+            self.service_name = self._get_service_name(self.service_name)
+            self.ingest_key = self._get_ingest_key()
+            self.endpoint = self._get_endpoint()
+            self.setup_logging()
+            ScoutOtelHandler._class_initialized = True
 
     def setup_logging(self):
         self.logger_provider = LoggerProvider(
@@ -45,12 +60,22 @@ class ScoutOtelHandler(logging.Handler):
         )
 
     def emit(self, record):
-        if getattr(self._handling_log, "value", False):
-            # We're already handling a log message, don't try to get the TrackedRequest
-            return self.otel_handler.emit(record)
-
         try:
             self._handling_log.value = True
+            # Initialize here to ensure that required configuration variables are loaded
+            if not ScoutOtelHandler._class_initialized:
+                try:
+                    self._initialize()
+                except Exception as e:
+                    print(f"Failed to initialize ScoutOtelHandler: {e}")
+                    return
+
+            if not self.otel_handler:
+                return
+
+            if getattr(self._handling_log, "value", False):
+                # We're already handling a log message, don't get the TrackedRequest
+                return self.otel_handler.emit(record)
             scout_request = TrackedRequest.instance()
 
             if scout_request:
@@ -65,11 +90,9 @@ class ScoutOtelHandler(logging.Handler):
                 # Add Scout-specific attributes to the log record
                 record.scout_request_id = scout_request.request_id
                 record.scout_start_time = scout_request.start_time.isoformat()
-                if scout_request.end_time:
-                    record.scout_end_time = scout_request.end_time.isoformat()
-
                 # Add duration if the request is completed
                 if scout_request.end_time:
+                    record.scout_end_time = scout_request.end_time.isoformat()
                     record.scout_duration = (
                         scout_request.end_time - scout_request.start_time
                     ).total_seconds()
