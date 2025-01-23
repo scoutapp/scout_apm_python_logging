@@ -7,14 +7,16 @@ from scout_apm.core.tracked_request import Span
 
 
 @pytest.fixture
-def otel_scout_handler():
+@patch("scout_apm_logging.handler.scout_config")
+def otel_scout_handler(mock_scout_config):
+    mock_scout_config.value.return_value = "test-ingest-key"
     with patch("scout_apm_logging.handler.OTLPLogExporter"), patch(
         "scout_apm_logging.handler.LoggerProvider"
     ), patch("scout_apm_logging.handler.BatchLogRecordProcessor"), patch(
         "scout_apm_logging.handler.Resource"
     ):
         handler = ScoutOtelHandler(service_name="test-service")
-        yield handler
+        return handler
 
 
 def test_init(otel_scout_handler):
