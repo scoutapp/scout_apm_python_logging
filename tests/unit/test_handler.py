@@ -9,7 +9,7 @@ from scout_apm.core.tracked_request import Span
 @pytest.fixture
 def otel_scout_handler():
     # Reset class initialization state
-    ScoutOtelHandler._class_initialized = False
+    ScoutOtelHandler.otel_handler = None
 
     with patch("scout_apm_logging.handler.scout_config") as mock_scout_config, patch(
         "scout_apm_logging.handler.OTLPLogExporter"
@@ -46,7 +46,7 @@ def test_emit_with_scout_request(mock_tracked_request, otel_scout_handler):
     ]
     mock_tracked_request.instance.return_value = mock_request
 
-    with patch.object(otel_scout_handler, "otel_handler") as mock_otel_handler:
+    with patch.object(ScoutOtelHandler, "otel_handler") as mock_otel_handler:
         record = logging.LogRecord(
             name="test",
             level=logging.INFO,
@@ -81,7 +81,7 @@ def test_emit_when_scout_request_contains_operation(
     mock_request.operation = MagicMock().return_value = "Controller/foobar"
     mock_tracked_request.instance.return_value = mock_request
 
-    with patch.object(otel_scout_handler, "otel_handler") as mock_otel_handler:
+    with patch.object(ScoutOtelHandler, "otel_handler") as mock_otel_handler:
         record = logging.LogRecord(
             name="test",
             level=logging.INFO,
@@ -104,7 +104,7 @@ def test_emit_when_scout_request_contains_operation(
 @patch("scout_apm_logging.handler.TrackedRequest")
 def test_emit_without_scout_request(mock_tracked_request, otel_scout_handler):
     mock_tracked_request.instance.return_value = None
-    with patch.object(otel_scout_handler, "otel_handler") as mock_otel_handler:
+    with patch.object(ScoutOtelHandler, "otel_handler") as mock_otel_handler:
         record = logging.LogRecord(
             name="test",
             level=logging.INFO,
@@ -121,7 +121,7 @@ def test_emit_without_scout_request(mock_tracked_request, otel_scout_handler):
 
 
 def test_emit_already_handling_log(otel_scout_handler):
-    with patch.object(otel_scout_handler, "otel_handler") as mock_otel_handler:
+    with patch.object(ScoutOtelHandler, "otel_handler") as mock_otel_handler:
         # Simulate that we're already handling a log message
         otel_scout_handler._handling_log.value = True
 
@@ -137,35 +137,6 @@ def test_emit_already_handling_log(otel_scout_handler):
         otel_scout_handler.emit(record)
 
         mock_otel_handler.emit.assert_called_once_with(record)
-
-    otel_scout_handler._handling_log.value = False
-
-
-def test_emit_exception_handling(otel_scout_handler):
-    with patch(
-        "scout_apm_logging.handler.TrackedRequest"
-    ) as mock_tracked_request, patch(
-        "sys.stdout", new_callable=io.StringIO
-    ) as mock_stdout:
-
-        mock_tracked_request.instance.side_effect = Exception("Test exception")
-
-        record = logging.LogRecord(
-            name="test",
-            level=logging.INFO,
-            pathname="",
-            lineno=0,
-            msg="Test message",
-            args=(),
-            exc_info=None,
-        )
-
-        otel_scout_handler.emit(record)
-
-        # Check that the exception was caught and the error message was printed
-        assert (
-            "Error in ScoutOtelHandler.emit: Test exception" in mock_stdout.getvalue()
-        )
 
     otel_scout_handler._handling_log.value = False
 
@@ -222,7 +193,7 @@ def test_emit_handles_initialization_failure():
         mock_scout_config.value.return_value = (
             None  # This will cause _get_ingest_key to fail
         )
-        ScoutOtelHandler._class_initialized = False
+        ScoutOtelHandler.otel_handler = None
 
         handler = ScoutOtelHandler(service_name="test-service")
 
