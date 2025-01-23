@@ -1,9 +1,15 @@
 [tool.poetry]
 name = "scout-apm-logging"
-version = "1.0.0"
+version = "1.0.1"
 description = "Scout APM Python Logging Agent"
-authors = ["Quinn Milionis <quinn@scoutapm.com>"]
+authors = ["Scout <support@scoutapm.com>"]
+maintainers = ["Quinn Milionis <quinn@scoutapm.com>"]
 readme = "README.md"
+
+[tool.poetry.urls]
+homepage = "https://scoutapm.com"
+repository = "https://github.com/scoutapp/scout_apm_python_logging"
+documentation = "https://scoutapm.com/docs/features/log-management"
 
 [tool.poetry.dependencies]
 python = "^3.9"
