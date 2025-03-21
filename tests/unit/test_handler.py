@@ -40,7 +40,7 @@ def test_emit_with_scout_request(mock_tracked_request, otel_scout_handler):
     mock_request.end_time.isoformat.return_value = "2024-03-06T12:00:01"
     mock_request.tags = {"key": "value"}
     mock_request.operation = None
-    mock_request.complete_spans = [
+    mock_request.active_spans = [
         Span(mock_request.id, "Middleware"),
         Span(mock_request.id, "Controller/foobar"),
     ]
@@ -75,7 +75,7 @@ def test_emit_when_scout_request_contains_operation(
     mock_request.start_time.isoformat.return_value = "2024-03-06T12:00:00"
     mock_request.end_time.isoformat.return_value = "2024-03-06T12:00:01"
     mock_request.tags = {"key": "value"}
-    mock_request.complete_spans = [
+    mock_request.active_spans = [
         Span(mock_request.id, "Middleware"),
     ]
     mock_request.operation = MagicMock().return_value = "Controller/foobar"
