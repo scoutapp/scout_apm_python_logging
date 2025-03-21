@@ -15,7 +15,7 @@ class MockSpan:
 @dataclass
 class MockTrackedRequest:
     operation: Optional[str] = None
-    complete_spans: Optional[List[MockSpan]] = None
+    active_spans: Optional[List[MockSpan]] = None
 
 
 def test_operation_detail_entrypoint_attribute():
@@ -37,7 +37,7 @@ def test_get_operation_detail_from_spans():
         MockSpan(operation="Job/TestJob"),
         MockSpan(operation="Controller/TestController"),
     ]
-    record = MockTrackedRequest(complete_spans=spans)
+    record = MockTrackedRequest(active_spans=spans)
     result = get_operation_detail(record)
     assert result == OperationDetail(
         name="TestController", type=OperationType.CONTROLLER
@@ -63,7 +63,7 @@ def test_get_operation_detail_no_operation_or_spans():
 
 
 def test_get_operation_detail_empty_spans():
-    record = MockTrackedRequest(complete_spans=[])
+    record = MockTrackedRequest(active_spans=[])
     result = get_operation_detail(record)
     assert result is None
 
@@ -73,7 +73,7 @@ def test_get_operation_detail_spans_no_match():
         MockSpan(operation="Other/Operation1"),
         MockSpan(operation="Other/Operation2"),
     ]
-    record = MockTrackedRequest(complete_spans=spans)
+    record = MockTrackedRequest(active_spans=spans)
     result = get_operation_detail(record)
     assert result is None
 
@@ -81,7 +81,7 @@ def test_get_operation_detail_spans_no_match():
 def test_get_operation_detail_operation_priority():
     spans = [MockSpan(operation="Job/TestJob")]
     record = MockTrackedRequest(
-        operation="Controller/TestController", complete_spans=spans
+        operation="Controller/TestController", active_spans=spans
     )
     result = get_operation_detail(record)
     assert result == OperationDetail(

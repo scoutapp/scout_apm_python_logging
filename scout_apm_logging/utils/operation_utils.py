@@ -39,7 +39,7 @@ def get_operation_detail(record: TrackedRequest) -> Optional[OperationDetail]:
         return extract_operation(operation)
 
     # Fall back to checking spans
-    spans = getattr(record, "complete_spans", None) or []
+    spans = getattr(record, "active_spans", None) or []
     for span in reversed(spans):
         result = extract_operation(span.operation)
         if result:
