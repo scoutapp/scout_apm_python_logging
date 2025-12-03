@@ -81,7 +81,7 @@ class ScoutOtelHandler(logging.Handler):
                 )
 
             # Add Scout-specific attributes to the log record
-            record.scout_request_id = scout_request.request_id
+            record.scout_transaction_id = scout_request.request_id
             record.scout_start_time = scout_request.start_time.isoformat()
             # Add duration if the request is completed
             if scout_request.end_time:

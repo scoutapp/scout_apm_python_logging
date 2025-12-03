@@ -59,7 +59,7 @@ def test_emit_with_scout_request(mock_tracked_request, otel_scout_handler):
         otel_scout_handler.emit(record)
 
         mock_otel_handler.emit.assert_called_once()
-        assert record.scout_request_id == "test-id"
+        assert record.scout_transaction_id == "test-id"
         assert record.scout_start_time == "2024-03-06T12:00:00"
         assert record.scout_end_time == "2024-03-06T12:00:01"
         assert record.scout_tag_key == "value"
@@ -94,7 +94,7 @@ def test_emit_when_scout_request_contains_operation(
         otel_scout_handler.emit(record)
 
     mock_otel_handler.emit.assert_called_once()
-    assert record.scout_request_id == "test-id"
+    assert record.scout_transaction_id == "test-id"
     assert record.scout_start_time == "2024-03-06T12:00:00"
     assert record.scout_end_time == "2024-03-06T12:00:01"
     assert record.scout_tag_key == "value"
@@ -117,7 +117,7 @@ def test_emit_without_scout_request(mock_tracked_request, otel_scout_handler):
         otel_scout_handler.emit(record)
 
         mock_otel_handler.emit.assert_called_once()
-        assert not hasattr(record, "scout_request_id")
+        assert not hasattr(record, "scout_transaction_id")
 
 
 def test_emit_already_handling_log(otel_scout_handler):
