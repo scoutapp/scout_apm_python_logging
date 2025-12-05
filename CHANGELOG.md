@@ -1,8 +1,10 @@
 # Changelog
 
 ## Pending
+
+## [1.0.2] 2025-12-05
 ### Changed
-- Rename `scout_request_id` log attribute to `scout_transaction_id` for compatability (#28)
+- Rename `scout_request_id` log attribute to `scout_transaction_id` for compatibility (#28)
 
 ## [1.0.1] 2024-09-12
 ### Added
