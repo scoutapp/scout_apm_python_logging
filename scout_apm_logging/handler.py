@@ -1,13 +1,15 @@
 import logging
 import os
 import threading
+
 from opentelemetry import _logs
 from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
 from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
 from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
 from opentelemetry.sdk.resources import Resource
-from scout_apm.core.tracked_request import TrackedRequest
 from scout_apm.core import scout_config
+from scout_apm.core.tracked_request import TrackedRequest
+
 from scout_apm_logging.utils.operation_utils import get_operation_detail
 
 
@@ -66,43 +68,50 @@ class ScoutOtelHandler(logging.Handler):
 
         if getattr(self._handling_log, "value", False):
             # We're already handling a log message, don't get the TrackedRequest
-            return ScoutOtelHandler.otel_handler.emit(record)
+            if ScoutOtelHandler.otel_handler:
+                return ScoutOtelHandler.otel_handler.emit(record)
+            return
 
-        self._handling_log.value = True
-        scout_request = TrackedRequest.instance()
+        try:
+            self._handling_log.value = True
+            scout_request = TrackedRequest.instance()
 
-        if scout_request:
-            operation_detail = get_operation_detail(scout_request)
-            if operation_detail:
-                setattr(
-                    record,
-                    operation_detail.entrypoint_attribute,
-                    operation_detail.name,
-                )
+            if scout_request:
+                operation_detail = get_operation_detail(scout_request)
+                if operation_detail:
+                    setattr(
+                        record,
+                        operation_detail.entrypoint_attribute,
+                        operation_detail.name,
+                    )
 
-            # Add Scout-specific attributes to the log record
-            record.scout_transaction_id = scout_request.request_id
-            record.scout_start_time = scout_request.start_time.isoformat()
-            # Add duration if the request is completed
-            if scout_request.end_time:
-                record.scout_end_time = scout_request.end_time.isoformat()
-                record.scout_duration = (
-                    scout_request.end_time - scout_request.start_time
-                ).total_seconds()
+                # Add Scout-specific attributes to the log record
+                record.scout_transaction_id = scout_request.request_id
+                record.scout_start_time = scout_request.start_time.isoformat()
+                # Add duration if the request is completed
+                if scout_request.end_time:
+                    record.scout_end_time = scout_request.end_time.isoformat()
+                    record.scout_duration = (
+                        scout_request.end_time - scout_request.start_time
+                    ).total_seconds()
 
-            setattr(record, "service.name", self.service_name)
+                setattr(record, "service.name", self.service_name)
 
-            # Add tags
-            for key, value in scout_request.tags.items():
-                setattr(record, f"scout_tag_{key}", value)
+                # Add tags
+                for key, value in scout_request.tags.items():
+                    setattr(record, f"scout_tag_{key}", value)
 
-            # Add the current span's operation if available
-            current_span = scout_request.current_span()
-            if current_span:
-                record.scout_current_operation = current_span.operation
+                # Add the current span's operation if available
+                current_span = scout_request.current_span()
+                if current_span:
+                    record.scout_current_operation = current_span.operation
 
-        ScoutOtelHandler.otel_handler.emit(record)
-        self._handling_log.value = False
+            if ScoutOtelHandler.otel_handler:
+                ScoutOtelHandler.otel_handler.emit(record)
+        except Exception as e:
+            print(f"Error in ScoutOtelHandler.emit: {e}")
+        finally:
+            self._handling_log.value = False
 
     def close(self):
         if self.logger_provider:
