@@ -1,6 +1,7 @@
 # Changelog
 
 ## Pending
+## [1.0.3] 2025-12-15
 ### Fixed
 - Shared logger provider being closed prematurely (#32)
 - Ensure `handling_log` set to false if emit fails
