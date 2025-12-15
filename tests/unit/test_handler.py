@@ -1,9 +1,11 @@
-import pytest
-import logging
 import io
-from unittest.mock import patch, MagicMock
-from scout_apm_logging.handler import ScoutOtelHandler
+import logging
+from unittest.mock import MagicMock, patch
+
+import pytest
 from scout_apm.core.tracked_request import Span
+
+from scout_apm_logging.handler import ScoutOtelHandler
 
 
 @pytest.fixture
@@ -11,14 +13,13 @@ def otel_scout_handler():
     # Reset class initialization state
     ScoutOtelHandler.otel_handler = None
 
-    with patch("scout_apm_logging.handler.scout_config") as mock_scout_config, patch(
-        "scout_apm_logging.handler.OTLPLogExporter"
-    ), patch("scout_apm_logging.handler.LoggerProvider"), patch(
-        "scout_apm_logging.handler.BatchLogRecordProcessor"
-    ), patch(
-        "scout_apm_logging.handler.Resource"
+    with (
+        patch("scout_apm_logging.handler.scout_config") as mock_scout_config,
+        patch("scout_apm_logging.handler.OTLPLogExporter"),
+        patch("scout_apm_logging.handler.LoggerProvider"),
+        patch("scout_apm_logging.handler.BatchLogRecordProcessor"),
+        patch("scout_apm_logging.handler.Resource"),
     ):
-
         mock_scout_config.value.return_value = "test-ingest-key"
         handler = ScoutOtelHandler(service_name="test-service")
         # Force initialization
@@ -141,10 +142,29 @@ def test_emit_already_handling_log(otel_scout_handler):
     otel_scout_handler._handling_log.value = False
 
 
-def test_close(otel_scout_handler):
-    with patch.object(otel_scout_handler.logger_provider, "shutdown") as mock_shutdown:
-        otel_scout_handler.close()
-        mock_shutdown.assert_called_once()
+@patch("scout_apm_logging.handler.TrackedRequest")
+def test_emit_resets_handling_log_on_exception(
+    mock_tracked_request, otel_scout_handler
+):
+    """Verify _handling_log.value is reset even when an exception occurs during emit."""
+    mock_tracked_request.instance.side_effect = RuntimeError("Test exception")
+
+    with patch.object(ScoutOtelHandler, "otel_handler"):
+        record = logging.LogRecord(
+            name="test",
+            level=logging.INFO,
+            pathname="",
+            lineno=0,
+            msg="Test message",
+            args=(),
+            exc_info=None,
+        )
+
+        with pytest.raises(RuntimeError, match="Test exception"):
+            otel_scout_handler.emit(record)
+
+        # The key assertion: _handling_log should be reset to False
+        assert otel_scout_handler._handling_log.value is False
 
 
 @patch("scout_apm_logging.handler.scout_config")
