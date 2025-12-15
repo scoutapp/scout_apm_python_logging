@@ -12,7 +12,7 @@ repository = "https://github.com/scoutapp/scout_apm_python_logging"
 documentation = "https://scoutapm.com/docs/features/log-management"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 opentelemetry-api = "^1.26.0"
 opentelemetry-sdk = "^1.26.0"
 opentelemetry-exporter-otlp = "^1.26.0"
