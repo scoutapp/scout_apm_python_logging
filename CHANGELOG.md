@@ -1,6 +1,12 @@
 # Changelog
 
 ## Pending
+### Fixed
+- Shared logger provider being closed prematurely (#32)
+- Ensure `handling_log` set to false if emit fails
+
+### Changed
+- Drop Python 3.9 support, add Python 3.13 and 3.14 support (#33)
 
 ## [1.0.2] 2025-12-05
 ### Changed
