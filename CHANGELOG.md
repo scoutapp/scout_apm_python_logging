@@ -1,6 +1,7 @@
 # Changelog
 
 ## Pending
+## [1.0.4] 2026-10-09
 ### Changed
 - Support scout-apm 4.x (#35)
 
