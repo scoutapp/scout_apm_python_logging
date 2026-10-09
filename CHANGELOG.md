@@ -1,6 +1,9 @@
 # Changelog
 
 ## Pending
+### Changed
+- Support scout-apm 4.x (#35)
+
 ## [1.0.3] 2025-12-15
 ### Fixed
 - Shared logger provider being closed prematurely (#32)
